@@ -8,44 +8,72 @@ import java.util.function.Supplier;
 public class Process {
     public static void main(String[] args) {
         Process process = new Process();
-        process.create(() -> new Client("Sean", 35, "vancouver", "123-456-7890", "sean@gmail.com", gender.MALE,
-                accountType.PERSONAL, 2315.30), m -> 5000 > m.getBankBalance(), m -> {
-            Account account = new Account(1, accountType.PERSONAL);
-            account.setAccountLevel(accountLevel.SILVER);
-            account.setLimit(1000);
-            return account;
-        }, f -> System.out.println("Customer Sean's account level is " + f.getAccountLevel() + " and his daily limit is " + f.getLimit()));
-
-        double amount = 900;
-        process.withdraw(() -> new Client("penny", 36, "vancouver", "123-456-7891", "sean@gmail.com", gender.FEMALE,
-                accountType.PERSONAL, 1100), m -> {boolean b; m.withdraw(amount); b = m.getBankBalance() >= 0; return b;}, m -> amount <= m.getLimit(),
+        process.processClient(
+                () -> new Client("Sean", 35, "vancouver", "123-456-7890", "sean@gmail.com", gender.MALE, accountType.PERSONAL, 2315.30),
+                m -> 5000 > m.getBankBalance(),
                 m -> {
-            Account account = new Account(2, accountType.PERSONAL);
-            account.setAccountLevel(accountLevel.SILVER);
-            account.setLimit(1000);
-            return account;
-        }, f -> System.out.println(" and his account limit is " + (f.getLimit() - amount)),
-                f -> System.out.print("Customer " +  f.getName() + "s balance is " + (f.getBankBalance())));
+                    Account account = new Account(1, accountType.PERSONAL);
+                    account.setAccountLevel(accountLevel.SILVER);
+                    account.setLimit(1000);
+                    return account;
+                },
+                f -> System.out.println("Customer Sean's account level is " + f.getAccountLevel() + " and his daily limit is " + f.getLimit())
+        );
+
+        double amount = 1050;
+        process.processClient(
+                () -> new Client("Penny", 36, "vancouver", "123-456-7891", "penny@gmail.com", gender.FEMALE, accountType.PERSONAL, 1100),
+                m -> {
+                    m.setBankBalance(m.getBankBalance() - amount);
+                    return m.getBankBalance() >= 0;
+                },
+                m -> amount <= m.getLimit(),
+                m -> {
+                    Account account = new Account(2, accountType.PERSONAL);
+                    account.setName(m.getName());
+                    account.setBalance(m.getBankBalance());
+                    account.setAccountLevel(accountLevel.SILVER);
+                    account.setLimit(1000);
+                    return account;
+                },
+                f -> System.out.print("Customer " + f.getName() + "'s balance is " + f.getBalance() + " and his account limit is " + (f.getLimit() - amount)),
+                () -> System.out.println("It is over the limit!"),
+                () -> System.out.println("You don't have enough money!")
+        );
     }
 
-    void create(Supplier<Client> userInfo, Predicate<Client> filter, Function<Client, Account> account, Consumer<Account> bankSystem) {
+    void processClient(
+            Supplier<Client> userInfo,
+            Predicate<Client> filter,
+            Function<Client, Account> accountCreator,
+            Consumer<Account> accountProcessor
+    ) {
         Client client = userInfo.get();
         if (filter.test(client)) {
-            Account userAccount = account.apply(client);
-            bankSystem.accept(userAccount);
+            Account account = accountCreator.apply(client);
+            accountProcessor.accept(account);
         }
     }
 
-    void withdraw(Supplier<Client> user, Predicate<Client> checkBalance, Predicate<Account> checkLimit, Function<Client, Account> cashMachine, Consumer<Account> bankSystem, Consumer<Client> clientBalance) {
-        Client client = user.get();
+    void processClient(
+            Supplier<Client> userInfo,
+            Predicate<Client> checkBalance,
+            Predicate<Account> checkLimit,
+            Function<Client, Account> accountCreator,
+            Consumer<Account> accountProcessor,
+            Runnable overLimitAction,
+            Runnable insufficientBalanceAction
+    ) {
+        Client client = userInfo.get();
         if (checkBalance.test(client)) {
-            Account userAccount = cashMachine.apply(client);
-            if (checkLimit.test(userAccount)) {
-                clientBalance.accept(client);
-                bankSystem.accept(userAccount);
+            Account account = accountCreator.apply(client);
+            if (checkLimit.test(account)) {
+                accountProcessor.accept(account);
+            } else {
+                overLimitAction.run();
             }
-            else {System.out.println("It is over the limit!");}
+        } else {
+            insufficientBalanceAction.run();
         }
-        else {System.out.println("You don't have enough money!");}
     }
 }

@@ -87,11 +87,6 @@ public class Client {
         this.bankBalance = bankBalance;
     }
 
-    public void withdraw(double amount) {
-        this.bankBalance -= amount;
-        this.setBankBalance(this.bankBalance);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
