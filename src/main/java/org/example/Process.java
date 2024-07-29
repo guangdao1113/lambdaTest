@@ -16,17 +16,16 @@ public class Process {
             return account;
         }, f -> System.out.println("Customer Sean's account level is " + f.getAccountLevel() + " and his daily limit is " + f.getLimit()));
 
-        double amount = 500.00;
-        process.withdraw(() -> new Client("Sean", 35, "vancouver", "123-456-7890", "sean@gmail.com", gender.MALE,
-                accountType.PERSONAL, 2315.30), m -> {boolean b; m.withdraw(amount); b = m.getBankBalance() >= 0; return b;},
-                m -> amount <= m.getLimit(), m -> {
-            Account account = new Account(1, accountType.PERSONAL);
+        double amount = 900;
+        process.withdraw(() -> new Client("penny", 36, "vancouver", "123-456-7891", "sean@gmail.com", gender.FEMALE,
+                accountType.PERSONAL, 1100), m -> {boolean b; m.withdraw(amount); b = m.getBankBalance() >= 0; return b;}, m -> amount <= m.getLimit(),
+                m -> {
+            Account account = new Account(2, accountType.PERSONAL);
             account.setAccountLevel(accountLevel.SILVER);
             account.setLimit(1000);
-
             return account;
         }, f -> System.out.println(" and his account limit is " + (f.getLimit() - amount)),
-                f -> System.out.print("Customer Sean's balance is " + (f.getBankBalance() - amount)));
+                f -> System.out.print("Customer " +  f.getName() + "s balance is " + (f.getBankBalance())));
     }
 
     void create(Supplier<Client> userInfo, Predicate<Client> filter, Function<Client, Account> account, Consumer<Account> bankSystem) {
