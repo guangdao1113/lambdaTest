@@ -60,4 +60,15 @@ public class Account {
     public void setAccountLevel(org.example.accountLevel accountLevel) {
         this.accountLevel = accountLevel;
     }
+
+    @Override
+    public String toString() {
+        return "Account details: \n" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", balance=" + balance +
+                ", accountType=" + accountType +
+                ", limit=" + limit +
+                ", accountLevel=" + accountLevel;
+    }
 }
