@@ -99,11 +99,11 @@ public class Process {
         account.setAccountLevel(level);
 
         // Set account limit based on account level
-        int limit = switch (level) {
+        double limit = switch (level) {
             case SILVER -> 1000;
             case GOLD -> 3000;
             case DIAMOND -> 10000;
-            default -> Integer.MAX_VALUE; // No limit
+            default -> Double.MAX_VALUE; // No limit
         };
         account.setLimit(limit);
 
