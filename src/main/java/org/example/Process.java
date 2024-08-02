@@ -3,11 +3,10 @@ package org.example;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Process {
     public static void main(String[] args) {
-        List<Client> clients = new ArrayList<Client>();
+        List<Client> clients = new ArrayList<>();
         clients.add(new Client("Sean", 35, "vancouver", "123-456-7890", "sean@gmail.com", gender.MALE, accountType.PERSONAL, 2500.00));
         clients.add(new Client("Penny", 36, "burnaby", "123-456-7891", "penny@gmail.com", gender.FEMALE, accountType.PERSONAL, 5500.00));
         clients.add(new Client("Jason", 50, "toronto", "456-612-7890", "jason@hotmail.com", gender.MALE, accountType.PERSONAL, 252500.00));
@@ -37,7 +36,22 @@ public class Process {
                 .toList();                                                          // terminal
 
         femaleEmails.forEach(System.out::println);
+        System.out.println("===============================");
 
+        clients.stream().
+                max(Comparator.comparingDouble(Client::getBankBalance))
+                .map(c -> c.getName() + " " +  c.getBankBalance())
+                .ifPresent(System.out::println);
+        System.out.println("===============================");
 
+        Process process = new Process();
+        String email = "penny@gmail.com";
+        String phoneNumber = "789-543-0000";
+        process.updateProfile(email, clients, phoneNumber);
+    }
+
+    void updateProfile (String email, List<Client> clients, String newPhoneNumber) {
+        clients.stream().filter(client -> (email).equals(client.getEmail())).findFirst().ifPresent(c -> {c.setPhone(newPhoneNumber);
+        System.out.println(c);});
     }
 }
