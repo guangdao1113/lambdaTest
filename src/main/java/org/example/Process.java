@@ -48,10 +48,29 @@ public class Process {
         String email = "penny@gmail.com";
         String phoneNumber = "789-543-0000";
         process.updateProfile(email, clients, phoneNumber);
+        System.out.println("===============================");
+
+        List<String> result = clients.stream().sorted(Comparator.comparingInt(Client::getAge)).filter(s -> s.getAge() > 35).limit(3).skip(1)
+                .map(Client::getName).peek(System.out::println).toList();
+        System.out.println(result);
+        System.out.println("===============================");
+        clients.stream().sorted(Comparator.comparingInt(Client::getAge)).takeWhile(s -> s.getAge() < 38).map(Client::getName)
+                .forEach(System.out::println);
+        System.out.println("===============================");
+        clients.stream().map(Client::getBankBalance).reduce(Double::sum).ifPresent(System.out::println);
+        System.out.println("===============================");
+        System.out.println(clients.stream().filter(c -> c.getBankBalance() > 6000).count() + " clients have balance more than 6000!");
+        System.out.println("===============================");
+        System.out.println(clients.stream().allMatch(c -> c.getBankBalance() > 6000)
+                ? "All clients have more than 6000"
+                : "Not all clients have more than 6000");
     }
 
     void updateProfile (String email, List<Client> clients, String newPhoneNumber) {
-        clients.stream().filter(client -> (email).equals(client.getEmail())).findFirst().ifPresent(c -> {c.setPhone(newPhoneNumber);
-        System.out.println(c);});
+        clients.stream().
+                filter(client -> (email).equals(client.getEmail())).        // intermediate
+                findAny().                                                // terminal
+                ifPresent(c -> {c.setPhone(newPhoneNumber);                 // terminal
+                System.out.println(c.getName() + "'s phone number is " + c.getPhone());});
     }
 }
